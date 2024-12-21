@@ -1,0 +1,118 @@
+import java.util.*;
+
+public class BFS {
+
+    // Đồ thị được biểu diễn dưới dạng danh sách kề
+    private static Map<Character, List<Character>> graph;
+
+    // Thiết lập biểu đồ cho một số cấu hình nhất định
+    public static void setConfiguration(int configNum) {
+        graph = new HashMap<>();
+        switch (configNum) {
+            case 1 -> {
+                graph.put('A', Arrays.asList('B', 'C'));
+                graph.put('B', Arrays.asList('D', 'E'));
+                graph.put('C', Arrays.asList('F'));
+                graph.put('D', Arrays.asList('G'));
+                graph.put('E', Arrays.asList('H'));
+                graph.put('F', Arrays.asList('H'));
+                graph.put('G', List.of('H'));
+                graph.put('H', List.of());
+            }
+            case 2 -> {
+                graph.put('A', Arrays.asList('B', 'C'));
+                graph.put('B', Arrays.asList('D'));
+                graph.put('C', Arrays.asList('E', 'F'));
+                graph.put('D', Arrays.asList('G'));
+                graph.put('E', List.of('H'));
+                graph.put('F', Arrays.asList('G', 'H'));
+                graph.put('G', List.of('H'));
+                graph.put('H', List.of());
+            }
+            case 3 -> {
+                graph.put('A', Arrays.asList('B', 'D'));
+                graph.put('B', Arrays.asList('C', 'E'));
+                graph.put('C', Arrays.asList('F'));
+                graph.put('D', Arrays.asList('G'));
+                graph.put('E', Arrays.asList('H'));
+                graph.put('F', Arrays.asList('H'));
+                graph.put('G', List.of('H'));
+                graph.put('H', List.of());
+            }
+            case 4 -> {
+                graph.put('A', Arrays.asList('B', 'C'));
+                graph.put('B', Arrays.asList('D', 'F'));
+                graph.put('C', Arrays.asList('E'));
+                graph.put('D', Arrays.asList('G'));
+                graph.put('E', Arrays.asList('H'));
+                graph.put('F', Arrays.asList('H'));
+                graph.put('G', List.of('H'));
+                graph.put('H', List.of());
+            }
+            case 5 -> {
+                graph.put('A', Arrays.asList('B', 'C'));
+                graph.put('B', Arrays.asList('D', 'E'));
+                graph.put('C', Arrays.asList('F', 'G'));
+                graph.put('D', Arrays.asList('H'));
+                graph.put('E', Arrays.asList('H'));
+                graph.put('F', Arrays.asList('H'));
+                graph.put('G', Arrays.asList('H'));
+                graph.put('H', List.of());
+            }
+            default -> throw new IllegalArgumentException("Invalid configuration number");
+        }
+    }
+
+    // Biểu diễn BFS để tìm đường đi ngắn nhất từ đỉnh bắt đầu đến đỉnh đích
+    public static List<Character> bfs(char start, char goal) {
+        Queue<List<Character>> queue = new LinkedList<>();
+        Set<Character> visited = new HashSet<>();
+
+        // Bắt đầu với nút bắt đầu
+        queue.add(Collections.singletonList(start));
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            List<Character> path = queue.poll();
+            char current = path.get(path.size() - 1);
+
+            // nếu tìm thấy đích, trả về đường đi
+            if (current == goal) {
+                return path;
+            }
+
+            // thăm các cạnh kề
+            for (char neighbor : graph.getOrDefault(current, List.of())) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    List<Character> newPath = new ArrayList<>(path);
+                    newPath.add(neighbor);
+                    queue.add(newPath);
+                }
+            }
+        }
+
+        // nếu không tìm thấy đường đi, trả về 1 danh sách rỗng
+        return List.of();
+    }
+
+    public static void main(String[] args) {
+        // Chạy thuật toán BFS với 5 cấu hình
+        for (int config = 1; config <= 5; config++) {
+            System.out.println("=== Cấu hình " + config + " ===");
+
+            // Cài đặt đồ thị cho cấu hình hiện tại
+            setConfiguration(config);
+
+            // Biểu diễn BFS từ A đến H
+            List<Character> path = bfs('A', 'H');
+
+            if (path.isEmpty()) {
+                System.out.println("Không tìm thấy đường đi từ A đến H.");
+            } else {
+                System.out.println("Đường đi tìm thấy: " + path);
+            }
+        }
+    }
+}
+
