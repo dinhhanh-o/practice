@@ -1,0 +1,170 @@
+import java.util.*;
+
+public class HillClimbing {
+
+    // Đồ thị lưu trữ các điểm và các điểm kề
+    private static Map<Character, List<Pair>> graph = new HashMap<>();
+    // Heuristic của mỗi điểm
+    private static Map<Character, Integer> heuristic = new HashMap<>();
+
+    // Lớp phụ trợ Pair để lưu trữ các điểm và trọng số của chúng
+    static class Pair {
+        char node;
+        int weight;
+
+        Pair(char node, int weight) {
+            this.node = node;
+            this.weight = weight;
+        }
+    }
+
+    // Hàm thiết lập đồ thị và heuristic cho từng cấu hình
+    private static void setConfiguration(int configNum) {
+        // Xóa đồ thị và heuristic cũ
+        graph.clear();
+        heuristic.clear();
+
+        if (configNum == 1) {
+            // Cấu hình 1
+            graph.put('A', Arrays.asList(new Pair('B', 1), new Pair('C', 4)));
+            graph.put('B', Arrays.asList(new Pair('D', 2), new Pair('E', 5)));
+            graph.put('C', Arrays.asList(new Pair('F', 1), new Pair('G', 6)));
+            graph.put('D', Arrays.asList(new Pair('H', 3)));
+            graph.put('E', Arrays.asList(new Pair('H', 2)));
+
+            heuristic.put('A', 10);
+            heuristic.put('B', 8);
+            heuristic.put('C', 9);
+            heuristic.put('D', 7);
+            heuristic.put('E', 6);
+            heuristic.put('F', 5);
+            heuristic.put('G', 4);
+            heuristic.put('H', 0);
+        } else if (configNum == 2) {
+            // Cấu hình 2
+            graph.put('A', Arrays.asList(new Pair('B', 1), new Pair('C', 4)));
+            graph.put('B', Arrays.asList(new Pair('D', 2), new Pair('E', 5)));
+            graph.put('C', Arrays.asList(new Pair('F', 1), new Pair('G', 6)));
+            graph.put('D', Arrays.asList(new Pair('H', 3)));
+            graph.put('E', Arrays.asList(new Pair('H', 2)));
+
+            heuristic.put('A', 12);
+            heuristic.put('B', 9);
+            heuristic.put('C', 6);
+            heuristic.put('D', 7);
+            heuristic.put('E', 5);
+            heuristic.put('F', 4);
+            heuristic.put('G', 8);
+            heuristic.put('H', 0);
+        } else if (configNum == 3) {
+            // Cấu hình 3
+            graph.put('A', Arrays.asList(new Pair('B', 3), new Pair('C', 2)));
+            graph.put('B', Arrays.asList(new Pair('D', 1), new Pair('E', 3)));
+            graph.put('C', Arrays.asList(new Pair('F', 4), new Pair('G', 5)));
+            graph.put('D', Arrays.asList(new Pair('H', 2)));
+            graph.put('E', Arrays.asList(new Pair('H', 1)));
+
+            heuristic.put('A', 7);
+            heuristic.put('B', 6);
+            heuristic.put('C', 8);
+            heuristic.put('D', 4);
+            heuristic.put('E', 5);
+            heuristic.put('F', 3);
+            heuristic.put('G', 2);
+            heuristic.put('H', 0);
+        } else if (configNum == 4) {
+            // Cấu hình 4
+            graph.put('A', Arrays.asList(new Pair('B', 2), new Pair('C', 5)));
+            graph.put('B', Arrays.asList(new Pair('D', 4), new Pair('E', 1)));
+            graph.put('C', Arrays.asList(new Pair('F', 6), new Pair('G', 3)));
+            graph.put('D', Arrays.asList(new Pair('H', 7)));
+            graph.put('E', Arrays.asList(new Pair('H', 2)));
+
+            heuristic.put('A', 9);
+            heuristic.put('B', 8);
+            heuristic.put('C', 7);
+            heuristic.put('D', 6);
+            heuristic.put('E', 4);
+            heuristic.put('F', 3);
+            heuristic.put('G', 2);
+            heuristic.put('H', 0);
+        } else if (configNum == 5) {
+            // Cấu hình 5
+            graph.put('A', Arrays.asList(new Pair('B', 2), new Pair('C', 3)));
+            graph.put('B', Arrays.asList(new Pair('D', 3), new Pair('E', 2)));
+            graph.put('C', Arrays.asList(new Pair('F', 2), new Pair('G', 1)));
+            graph.put('D', Arrays.asList(new Pair('H', 5)));
+            graph.put('E', Arrays.asList(new Pair('H', 4)));
+
+            heuristic.put('A', 6);
+            heuristic.put('B', 5);
+            heuristic.put('C', 4);
+            heuristic.put('D', 7);
+            heuristic.put('E', 8);
+            heuristic.put('F', 3);
+            heuristic.put('G', 2);
+            heuristic.put('H', 0);
+        }
+    }
+
+    // Thuật toán tìm kiếm leo đồi
+    private static boolean hillClimbing(char start, char goal, List<Character> path) {
+        char current = start;
+        path.add(current);
+
+        while (current != goal) {
+            char next = current;
+            int minHeuristic = Integer.MAX_VALUE;
+
+            // Tìm điểm kề với heuristic nhỏ nhất
+            for (Pair pair : graph.getOrDefault(current, new ArrayList<>())) {
+                char neighbor = pair.node;
+                int cost = heuristic.getOrDefault(neighbor, Integer.MAX_VALUE);
+
+                if (cost < minHeuristic) {
+                    next = neighbor;
+                    minHeuristic = cost;
+                }
+            }
+
+            // Nếu không có điểm kế tiếp tốt hơn (mắc kẹt tại cực trị cục bộ)
+            if (next == current) {
+                return false;
+            }
+
+            current = next;
+            path.add(current);
+        }
+
+        return true;
+    }
+
+    public static void main(String[] args) {
+        char start = 'A', goal = 'H';
+        List<Character> path = new ArrayList<>();
+
+        // Chạy 5 cấu hình
+        for (int i = 1; i <= 5; i++) {
+            System.out.println("\n=== Cấu hình " + i + " ===");
+
+            // Thiết lập cấu hình đồ thị và heuristic
+            setConfiguration(i);
+
+            // Chạy thuật toán
+            path.clear();
+            if (hillClimbing(start, goal, path)) {
+                System.out.print("Đường đi tìm thấy: ");
+                for (int j = 0; j < path.size(); j++) {
+                    System.out.print(path.get(j));
+                    if (j < path.size() - 1) {
+                        System.out.print(" -> ");
+                    }
+                }
+                System.out.println();
+            } else {
+                System.out.println("Không tìm thấy đường đi (mắc kẹt tại cực trị cục bộ).");
+            }
+        }
+    }
+}
+
