@@ -1,5 +1,6 @@
 import java.util.*;
 
+// khuyến cáo chạy trên Java 12 trở lên
 public class BFSSearch {
 
     // Đồ thị được biểu diễn dưới dạng danh sách kề
