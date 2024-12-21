@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class HillClimbing {
+public class HillClimbingSearch {
 
     // Đồ thị lưu trữ các điểm và các điểm kề
     private static Map<Character, List<Pair>> graph = new HashMap<>();
