@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class BFS {
+public class BFSSearch {
 
     // Đồ thị được biểu diễn dưới dạng danh sách kề
     private static Map<Character, List<Character>> graph;
