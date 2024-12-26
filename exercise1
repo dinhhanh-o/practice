@@ -1,0 +1,163 @@
+package PracticeSession2;
+
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Exercise1 {
+
+    // Kiểm tra tính hợp lệ của biểu thức logic
+    public static boolean isValidExpression(String expression) {
+        int openParentheses = 0;
+        for (char c : expression.toCharArray()) {
+            if (c == '(') openParentheses++;
+            if (c == ')') openParentheses--;
+            if (openParentheses < 0) return false; // Dấu ngoặc đóng dư
+            if (!Character.isLetter(c) && c != ' ' && c != '(' && c != ')' && c != '&' && c != '|' && c != '!'
+                    && c != '-' && c != '<' && c != '>') {
+                return false; // Ký tự không hợp lệ
+            }
+        }
+        return openParentheses == 0; // Đảm bảo dấu ngoặc cân bằng
+    }
+
+    // Thay thế biến logic bằng giá trị
+    public static String replaceVariables(String expression, HashMap<Character, Boolean> variables) {
+        for (char c : expression.toCharArray()) {
+            if (Character.isLetter(c) && !variables.containsKey(c)) {
+                throw new IllegalArgumentException("Biểu thức chứa biến không được cung cấp giá trị: " + c);
+            }
+        }
+        for (char variable : variables.keySet()) {
+            expression = expression.replace(String.valueOf(variable), variables.get(variable) ? "1" : "0");
+        }
+        return expression;
+    }
+
+    // Tính giá trị của biểu thức logic
+    public static boolean evaluateExpression(String expression) {
+        Stack<Character> operators = new Stack<>();
+        Stack<Boolean> operands = new Stack<>();
+        expression = expression.replace("->", ">").replace("<->", "="); // Đơn giản hóa ký hiệu
+
+        for (int i = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+
+            // Bỏ qua khoảng trắng
+            if (c == ' ') continue;
+
+            // Xử lý toán hạng (0 hoặc 1)
+            if (c == '0' || c == '1') {
+                operands.push(c == '1');
+            }
+            // Xử lý toán tử phủ định
+            else if (c == '!') {
+                operators.push(c);
+            }
+            // Xử lý dấu mở ngoặc
+            else if (c == '(') {
+                operators.push(c);
+            }
+            // Xử lý dấu đóng ngoặc
+            else if (c == ')') {
+                if (operators.isEmpty())
+                    throw new IllegalArgumentException("Biểu thức không hợp lệ: thiếu dấu ngoặc mở.");
+                while (!operators.isEmpty() && operators.peek() != '(') {
+                    char operator = operators.pop();
+                    applyOperator(operator, operands);
+                }
+                if (operators.isEmpty() || operators.pop() != '(') {
+                    throw new IllegalArgumentException("Biểu thức không hợp lệ: " +
+                            "dấu ngoặc đóng không có dấu mở tương ứng.");
+                }
+            }
+            // Xử lý các toán tử khác (&, |, >, =)
+            else if (c == '&' || c == '|' || c == '>' || c == '=') {
+                while (!operators.isEmpty() && precedence(operators.peek()) >= precedence(c)) {
+                    char operator = operators.pop();
+                    applyOperator(operator, operands);
+                }
+                operators.push(c);
+            }
+        }
+
+        // Xử lý các toán tử còn lại trong stack
+        while (!operators.isEmpty()) {
+            char operator = operators.pop();
+            applyOperator(operator, operands);
+        }
+
+        // Kết quả cuối cùng
+        return operands.pop();
+    }
+
+    // Độ ưu tiên của toán tử
+    private static int precedence(char operator) {
+        switch (operator) {
+            case '!': return 3;
+            case '&': return 2;
+            case '|': return 1;
+            case '>': return 0;
+            case '=': return 0;
+            default: return -1;
+        }
+    }
+
+    // Áp dụng toán tử lên các toán hạng
+    private static void applyOperator(char operator, Stack<Boolean> operands) {
+        if (operator == '!') {
+            if (operands.isEmpty())
+                throw new IllegalArgumentException("Biểu thức không hợp lệ: thiếu toán hạng cho toán tử '!'.");
+            boolean operand = operands.pop();
+            operands.push(!operand);
+        } else {
+            if (operands.size() < 2)
+                throw new IllegalArgumentException("Biểu thức không hợp lệ: thiếu toán hạng cho toán tử '"
+                        + operator + "'.");
+            boolean b = operands.pop();
+            boolean a = operands.pop();
+
+            switch (operator) {
+                case '&': operands.push(a && b); break;
+                case '|': operands.push(a || b); break;
+                case '>': operands.push(!a || b); break; // a -> b
+                case '=': operands.push(a == b); break; // a <-> b
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Nhập biểu thức logic
+        System.out.print("Nhập biểu thức logic (ví dụ: (A & B) -> !C): ");
+        String expression = scanner.nextLine();
+
+        // Kiểm tra tính hợp lệ
+        if (!isValidExpression(expression)) {
+            System.out.println("Biểu thức không hợp lệ.");
+            return;
+        }
+
+        // Nhập các biến logic
+        System.out.print("Nhập số lượng biến logic: ");
+        int numVars = scanner.nextInt();
+        HashMap<Character, Boolean> variables = new HashMap<>();
+        scanner.nextLine(); // Bỏ qua ký tự xuống dòng sau nextInt()
+
+        for (int i = 0; i < numVars; i++) {
+            System.out.print("Nhập tên biến (A-Z): ");
+            char variable = scanner.nextLine().charAt(0);
+            System.out.print("Nhập giá trị (true hoặc false): ");
+            boolean value = Boolean.parseBoolean(scanner.nextLine());
+            variables.put(variable, value);
+        }
+
+        // Thay thế biến trong biểu thức
+        expression = replaceVariables(expression, variables);
+
+        // Tính và hiển thị kết quả
+        boolean result = evaluateExpression(expression);
+        System.out.println("Kết quả biểu thức: " + result);
+    }
+}
